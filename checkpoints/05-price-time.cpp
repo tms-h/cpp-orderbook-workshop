@@ -6,12 +6,8 @@
 #include <string_view>
 #include <vector>
 
-using Price = int;
+using Price = int;  // Whole-number ticks: 99, 100, 101.
 using Quantity = int;
-
-constexpr Price dollars(int amount) {
-    return amount * 100;
-}
 
 enum class Side {
     Buy,
@@ -65,6 +61,7 @@ private:
     SellLevels sells_;
 };
 
+// Supplied behaviour tests start here. Ignore main() during the workshop.
 class Checks {
 public:
     void expect(std::string_view behaviour, bool happened) {
@@ -81,10 +78,10 @@ private:
 int main() {
     Checks checks;
     OrderBook book;
-    book.add({1, Side::Buy, dollars(100), 6});  // Bob arrives first
-    book.add({2, Side::Buy, dollars(100), 4});  // John arrives second
+    book.add({1, Side::Buy, 100, 6});  // Bob arrives first
+    book.add({2, Side::Buy, 100, 4});  // John arrives second
 
-    Order alice{3, Side::Sell, dollars(100), 8};
+    Order alice{3, Side::Sell, 100, 8};
     const std::vector<Trade> trades = book.match_sell(alice);
 
     checks.expect("two trades are reported", trades.size() == 2);

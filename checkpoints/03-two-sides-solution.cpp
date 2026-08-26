@@ -4,12 +4,8 @@
 #include <map>
 #include <string_view>
 
-using Price = int;
+using Price = int;  // Whole-number ticks: 99, 100, 101.
 using Quantity = int;
-
-constexpr Price dollars(int amount) {
-    return amount * 100;
-}
 
 enum class Side {
     Buy,
@@ -61,6 +57,7 @@ private:
     SellLevels sells_;
 };
 
+// Supplied behaviour tests start here. Ignore main() during the workshop.
 class Checks {
 public:
     void expect(std::string_view behaviour, bool happened) {
@@ -78,23 +75,23 @@ int main() {
     Checks checks;
     OrderBook book;
 
-    book.add({1, Side::Buy, dollars(100), 6});   // Bob
-    book.add({2, Side::Buy, dollars(99), 3});    // David
-    book.add({3, Side::Sell, dollars(103), 4});  // Alice
-    book.add({4, Side::Sell, dollars(102), 2});  // Charlie
+    book.add({1, Side::Buy, 100, 6});   // Bob
+    book.add({2, Side::Buy, 99, 3});    // David
+    book.add({3, Side::Sell, 103, 4});  // Alice
+    book.add({4, Side::Sell, 102, 2});  // Charlie
 
     const Order* buy = book.best_buy();
     const Order* sell = book.best_sell();
 
     checks.expect("two Sell prices are stored", book.sell_price_count() == 2);
-    checks.expect("Bob's $100 order is the best Buy", buy != nullptr
+    checks.expect("Bob's price 100 order is the best Buy", buy != nullptr
                                                         && buy->id == 1
-                                                        && buy->price == dollars(100));
-    checks.expect("Charlie's $102 order is the best Sell", sell != nullptr
+                                                        && buy->price == 100);
+    checks.expect("Charlie's price 102 order is the best Sell", sell != nullptr
                                                             && sell->id == 4
-                                                            && sell->price == dollars(102));
-    checks.expect("the spread is $2", buy != nullptr && sell != nullptr
-                                           && sell->price - buy->price == dollars(2));
+                                                            && sell->price == 102);
+    checks.expect("the spread is 2 ticks", buy != nullptr && sell != nullptr
+                                           && sell->price - buy->price == 2);
 
     return checks.finish();
 }

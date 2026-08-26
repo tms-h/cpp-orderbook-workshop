@@ -6,12 +6,8 @@
 #include <string_view>
 #include <vector>
 
-using Price = int;
+using Price = int;  // Whole-number ticks: 99, 100, 101.
 using Quantity = int;
-
-constexpr Price dollars(int amount) {
-    return amount * 100;
-}
 
 enum class Side {
     Buy,
@@ -119,6 +115,7 @@ private:
     SellLevels sells_;
 };
 
+// Supplied behaviour tests start here. Ignore main() during the workshop.
 class Checks {
 public:
     void expect(std::string_view behaviour, bool happened) {
@@ -136,12 +133,12 @@ int main() {
     Checks checks;
     OrderBook book;
 
-    book.submit({1, Side::Buy, dollars(100), 6});  // Bob
-    book.submit({2, Side::Buy, dollars(100), 4});  // John
-    book.submit({3, Side::Buy, dollars(99), 3});   // David
+    book.submit({1, Side::Buy, 100, 6});  // Bob
+    book.submit({2, Side::Buy, 100, 4});  // John
+    book.submit({3, Side::Buy, 99, 3});   // David
 
     const std::vector<Trade> alice_trades =
-        book.submit({4, Side::Sell, dollars(99), 8});
+        book.submit({4, Side::Sell, 99, 8});
     checks.expect("Alice trades with Bob, then John", alice_trades.size() == 2
                                                            && alice_trades[0].buyer_id == 1
                                                            && alice_trades[0].quantity == 6
@@ -154,23 +151,23 @@ int main() {
                                                        && john->quantity == 2);
 
     const std::vector<Trade> charlie_trades =
-        book.submit({5, Side::Sell, dollars(99), 5});
+        book.submit({5, Side::Sell, 99, 5});
     checks.expect("Charlie sweeps two Buy prices", charlie_trades.size() == 2
-                                                       && charlie_trades[0].price == dollars(100)
-                                                       && charlie_trades[1].price == dollars(99));
+                                                       && charlie_trades[0].price == 100
+                                                       && charlie_trades[1].price == 99);
     checks.expect("all resting Buys are filled", book.best_buy() == nullptr);
 
-    book.submit({6, Side::Buy, dollars(103), 4});   // Emma rests
+    book.submit({6, Side::Buy, 103, 4});   // Emma rests
     const std::vector<Trade> frank_trades =
-        book.submit({7, Side::Sell, dollars(102), 6});
-    checks.expect("Frank trades 4 at Emma's resting $103", frank_trades.size() == 1
-                                                               && frank_trades[0].price == dollars(103)
+        book.submit({7, Side::Sell, 102, 6});
+    checks.expect("Frank trades 4 at Emma's resting price 103", frank_trades.size() == 1
+                                                               && frank_trades[0].price == 103
                                                                && frank_trades[0].quantity == 4);
 
     const Order* frank = book.best_sell();
-    checks.expect("Frank's remaining Sell 2 rests at $102", frank != nullptr
+    checks.expect("Frank's remaining Sell 2 rests at price 102", frank != nullptr
                                                                && frank->id == 7
-                                                               && frank->price == dollars(102)
+                                                               && frank->price == 102
                                                                && frank->quantity == 2);
 
     return checks.finish();

@@ -5,12 +5,8 @@
 #include <map>
 #include <string_view>
 
-using Price = int;
+using Price = int;  // Whole-number ticks: 99, 100, 101.
 using Quantity = int;
-
-constexpr Price dollars(int amount) {
-    return amount * 100;
-}
 
 enum class Side {
     Buy,
@@ -64,6 +60,7 @@ private:
     SellLevels sells_;
 };
 
+// Supplied behaviour tests start here. Ignore main() during the workshop.
 class Checks {
 public:
     void expect(std::string_view behaviour, bool happened) {
@@ -80,22 +77,22 @@ private:
 int main() {
     Checks checks;
     OrderBook book;
-    book.add({1, Side::Buy, dollars(100), 6});  // resting Bob
+    book.add({1, Side::Buy, 100, 6});  // resting Bob
 
-    Order alice{2, Side::Sell, dollars(99), 3};
+    Order alice{2, Side::Sell, 99, 3};
     const Trade trade = book.match_one_sell(alice);
 
     checks.expect("Alice trades with Bob", trade.buyer_id == 1 && trade.seller_id == 2);
     checks.expect("the smaller quantity of 3 trades", trade.quantity == 3);
-    checks.expect("the resting $100 price sets the trade", trade.price == dollars(100));
+    checks.expect("the resting price 100 sets the trade", trade.price == 100);
     checks.expect("Alice is completely filled", alice.quantity == 0);
 
     const Order* bob = book.best_buy();
     checks.expect("Bob remains with quantity 3", bob != nullptr && bob->quantity == 3);
 
-    Order charlie{3, Side::Sell, dollars(101), 2};
+    Order charlie{3, Side::Sell, 101, 2};
     const Trade no_trade = book.match_one_sell(charlie);
-    checks.expect("a $101 Sell does not cross a $100 Buy", no_trade.quantity == 0
+    checks.expect("a Sell at 101 does not cross a Buy at 100", no_trade.quantity == 0
                                                             && charlie.quantity == 2);
 
     return checks.finish();

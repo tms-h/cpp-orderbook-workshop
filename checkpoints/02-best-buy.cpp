@@ -4,12 +4,8 @@
 #include <map>
 #include <string_view>
 
-using Price = int;
+using Price = int;  // Whole-number ticks: 99, 100, 101.
 using Quantity = int;
-
-constexpr Price dollars(int amount) {
-    return amount * 100;
-}
 
 enum class Side {
     Buy,
@@ -46,6 +42,7 @@ private:
     BuyLevels buys_;
 };
 
+// Supplied behaviour tests start here. Ignore main() during the workshop.
 class Checks {
 public:
     void expect(std::string_view behaviour, bool happened) {
@@ -63,16 +60,16 @@ int main() {
     Checks checks;
     OrderBook book;
 
-    book.add_buy({1, Side::Buy, dollars(100), 6});  // Bob
-    book.add_buy({2, Side::Buy, dollars(99), 3});   // David
-    book.add_buy({3, Side::Buy, dollars(101), 2});  // Eve
+    book.add_buy({1, Side::Buy, 100, 6});  // Bob
+    book.add_buy({2, Side::Buy, 99, 3});   // David
+    book.add_buy({3, Side::Buy, 101, 2});  // Eve
 
     checks.expect("three Buy prices are stored", book.buy_price_count() == 3);
 
     const Order* best = book.best_buy();
     checks.expect("a best Buy exists", best != nullptr);
     if (best != nullptr) {
-        checks.expect("the highest Buy price is best", best->price == dollars(101));
+        checks.expect("the highest Buy price is best", best->price == 101);
         checks.expect("Eve owns the best Buy", best->id == 3);
     }
 
